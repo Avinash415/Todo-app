@@ -1,49 +1,132 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Todo() {
   const [task, setTask] = useState("");
   const [todos, setTodos] = useState([]);
 
-  const addTodo = async () => {
-    if (!task.trim()) return;
+  // Load from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("todos");
+    if (saved) {
+      setTodos(JSON.parse(saved));
+    }
+  }, []);
 
-    const res = await fetch("/api/todos", {
-      method: "POST",
-      body: JSON.stringify({ task }),
-    });
+  // Save to localStorage whenever todos change
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }, [todos]);
 
-    const data = await res.json();
-    setTodos([...todos, data]);
+  // Add task
+  const addTask = () => {
+    if (task.trim() === "") return;
+    setTodos([...todos, { id: Date.now(), text: task, completed: false }]);
     setTask("");
   };
 
-  const deleteTodo = async (id) => {
-    await fetch(`/api/todos?id=${id}`, { method: "DELETE" });
-    setTodos(todos.filter((t) => t.id !== id));
+  // Toggle complete
+  const toggleComplete = (id) => {
+    setTodos(
+      todos.map((todo) =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
+    );
+  };
+
+  // Delete task
+  const deleteTask = (id) => {
+    setTodos(todos.filter((todo) => todo.id !== id));
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Simple Todo App</h1>
+    <div style={styles.container}>
+      <div style={styles.inputBox}>
+        <input
+          style={styles.input}
+          type="text"
+          value={task}
+          onChange={(e) => setTask(e.target.value)}
+          placeholder="Enter your task..."
+        />
+        <button style={styles.addBtn} onClick={addTask}>
+          Add
+        </button>
+      </div>
 
-      <input
-        type="text"
-        placeholder="Enter task..."
-        value={task}
-        onChange={(e) => setTask(e.target.value)}
-      />
+      <ul style={styles.list}>
+        {todos.map((todo) => (
+          <li key={todo.id} style={styles.listItem}>
+            <span
+              onClick={() => toggleComplete(todo.id)}
+              style={{
+                ...styles.text,
+                textDecoration: todo.completed ? "line-through" : "none",
+                color: todo.completed ? "gray" : "black",
+                cursor: "pointer",
+              }}
+            >
+              {todo.text}
+            </span>
 
-      <button onClick={addTodo}>Add</button>
-
-      <ul>
-        {todos.map((t) => (
-          <li key={t.id}>
-            {t.task}
-            <button onClick={() => deleteTodo(t.id)}>❌</button>
+            <button
+              onClick={() => deleteTask(todo.id)}
+              style={styles.deleteBtn}
+            >
+              ❌
+            </button>
           </li>
         ))}
       </ul>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    marginTop: 20,
+    width: "100%",
+    maxWidth: 500,
+  },
+  inputBox: {
+    display: "flex",
+    gap: 10,
+    marginBottom: 20,
+  },
+  input: {
+    flex: 1,
+    padding: "10px 12px",
+    fontSize: 16,
+    border: "1px solid #ccc",
+    borderRadius: 8,
+  },
+  addBtn: {
+    padding: "10px 15px",
+    background: "#0070f3",
+    color: "white",
+    border: "none",
+    borderRadius: 8,
+    cursor: "pointer",
+  },
+  list: {
+    listStyle: "none",
+    padding: 0,
+  },
+  listItem: {
+    display: "flex",
+    justifyContent: "space-between",
+    padding: "10px 12px",
+    background: "#f2f2f2",
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  text: {
+    fontSize: 16,
+  },
+  deleteBtn: {
+    background: "transparent",
+    border: "none",
+    cursor: "pointer",
+    fontSize: 18,
+  },
+};
