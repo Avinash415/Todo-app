@@ -1,42 +1,49 @@
-'use client';
-import { useState, useEffect } from 'react';
+"use client";
+import { useState } from "react";
 
-export default function Todo(){
-  const [tasks, setTasks] = useState([]);
-  const [text, setText] = useState('');
+export default function Todo() {
+  const [task, setTask] = useState("");
+  const [todos, setTodos] = useState([]);
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem('todos_v1');
-      if(raw) setTasks(JSON.parse(raw));
-    } catch {}
-  }, []);
+  const addTodo = async () => {
+    if (!task.trim()) return;
 
-  useEffect(() => {
-    localStorage.setItem('todos_v1', JSON.stringify(tasks));
-  }, [tasks]);
+    const res = await fetch("/api/todos", {
+      method: "POST",
+      body: JSON.stringify({ task }),
+    });
 
-  function add(){
-    if(!text.trim()) return;
-    setTasks(prev => [{id:Date.now(), text}, ...prev]);
-    setText('');
-  }
-  function remove(id){ setTasks(prev => prev.filter(t=>t.id!==id)); }
+    const data = await res.json();
+    setTodos([...todos, data]);
+    setTask("");
+  };
+
+  const deleteTodo = async (id) => {
+    await fetch(`/api/todos?id=${id}`, { method: "DELETE" });
+    setTodos(todos.filter((t) => t.id !== id));
+  };
 
   return (
-    <section>
-      <div style={{display:'flex', gap:8, marginBottom:12}}>
-        <input value={text} onChange={e=>setText(e.target.value)} placeholder="Add task..." />
-        <button onClick={add}>Add</button>
-      </div>
+    <div style={{ padding: "20px" }}>
+      <h1>Simple Todo App</h1>
+
+      <input
+        type="text"
+        placeholder="Enter task..."
+        value={task}
+        onChange={(e) => setTask(e.target.value)}
+      />
+
+      <button onClick={addTodo}>Add</button>
+
       <ul>
-        {tasks.map(t => (
-          <li key={t.id} style={{display:'flex', justifyContent:'space-between', marginBottom:6}}>
-            <span>{t.text}</span>
-            <button onClick={()=>remove(t.id)}>Delete</button>
+        {todos.map((t) => (
+          <li key={t.id}>
+            {t.task}
+            <button onClick={() => deleteTodo(t.id)}>❌</button>
           </li>
         ))}
       </ul>
-    </section>
+    </div>
   );
 }
