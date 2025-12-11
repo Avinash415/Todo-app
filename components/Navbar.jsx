@@ -24,13 +24,13 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <div className="logo">🌤 AviTodo</div>
+      <div className="logo"><Link href="/" className="link">🌤 AviTodo</Link></div>
 
       <div className={`links ${showMenu ? "show" : ""}`}>
         <Link href="/" className="link">Home</Link>
         <Link href="/todo" className="link">Todo</Link>
-        <Link href="#" className="link">About</Link>
-        <Link href="#" className="link">Contact</Link>
+        <Link href="/about" className="link">About</Link>
+        <Link href="/contact" className="link">Contact</Link>
 
         <button className="btn" onClick={toggleDark}>
           {dark ? "Light Mode" : "Dark Mode"}
