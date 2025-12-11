@@ -1,10 +1,9 @@
-import Todo from '../components/Todo';
+import HeroSection from "../components/HeroSection";
 
-export default function Page() {
+export default function HomePage() {
   return (
-    <main style={{ padding: 20, fontFamily: 'system-ui, sans-serif' }}>
-      <h1>Todo Functional App (Next.js)</h1>
-      <Todo />
+    <main style={{ padding: 20 }}>
+      <HeroSection />
     </main>
   );
 }

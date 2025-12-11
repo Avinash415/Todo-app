@@ -5,51 +5,41 @@ export default function Todo() {
   const [task, setTask] = useState("");
   const [todos, setTodos] = useState([]);
 
-  // Load from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("todos");
-    if (saved) {
-      setTodos(JSON.parse(saved));
-    }
+    if (saved) setTodos(JSON.parse(saved));
   }, []);
 
-  // Save to localStorage whenever todos change
   useEffect(() => {
     localStorage.setItem("todos", JSON.stringify(todos));
   }, [todos]);
 
-  // Add task
   const addTask = () => {
-    if (task.trim() === "") return;
+    if (!task.trim()) return;
     setTodos([...todos, { id: Date.now(), text: task, completed: false }]);
     setTask("");
   };
 
-  // Toggle complete
-  const toggleComplete = (id) => {
+  const toggleComplete = (id) =>
     setTodos(
       todos.map((todo) =>
         todo.id === id ? { ...todo, completed: !todo.completed } : todo
       )
     );
-  };
 
-  // Delete task
-  const deleteTask = (id) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
-  };
+  const deleteTask = (id) => setTodos(todos.filter((todo) => todo.id !== id));
 
   return (
-    <div style={styles.container}>
+    <div className="container">
       <div style={styles.inputBox}>
         <input
-          style={styles.input}
           type="text"
+          style={styles.input}
           value={task}
           onChange={(e) => setTask(e.target.value)}
           placeholder="Enter your task..."
         />
-        <button style={styles.addBtn} onClick={addTask}>
+        <button className="btn" onClick={addTask}>
           Add
         </button>
       </div>
@@ -58,21 +48,17 @@ export default function Todo() {
         {todos.map((todo) => (
           <li key={todo.id} style={styles.listItem}>
             <span
-              onClick={() => toggleComplete(todo.id)}
               style={{
                 ...styles.text,
                 textDecoration: todo.completed ? "line-through" : "none",
-                color: todo.completed ? "gray" : "black",
-                cursor: "pointer",
+                color: todo.completed ? "gray" : "var(--text)",
               }}
+              onClick={() => toggleComplete(todo.id)}
             >
               {todo.text}
             </span>
 
-            <button
-              onClick={() => deleteTask(todo.id)}
-              style={styles.deleteBtn}
-            >
+            <button onClick={() => deleteTask(todo.id)} style={styles.deleteBtn}>
               ❌
             </button>
           </li>
@@ -83,50 +69,33 @@ export default function Todo() {
 }
 
 const styles = {
-  container: {
-    marginTop: 20,
-    width: "100%",
-    maxWidth: 500,
-  },
   inputBox: {
     display: "flex",
     gap: 10,
-    marginBottom: 20,
+    marginBottom: 25,
   },
   input: {
     flex: 1,
-    padding: "10px 12px",
+    padding: "12px",
     fontSize: 16,
-    border: "1px solid #ccc",
-    borderRadius: 8,
+    border: "1px solid #aaa",
+    borderRadius: 10,
   },
-  addBtn: {
-    padding: "10px 15px",
-    background: "#0070f3",
-    color: "white",
-    border: "none",
-    borderRadius: 8,
-    cursor: "pointer",
-  },
-  list: {
-    listStyle: "none",
-    padding: 0,
-  },
+  list: { padding: 0 },
   listItem: {
+    padding: "12px",
+    marginBottom: 10,
+    background: "var(--card)",
+    borderRadius: 10,
     display: "flex",
     justifyContent: "space-between",
-    padding: "10px 12px",
-    background: "#f2f2f2",
-    borderRadius: 8,
-    marginBottom: 10,
   },
-  text: {
-    fontSize: 16,
-  },
+  text: { fontSize: 16, cursor: "pointer" },
   deleteBtn: {
+    fontSize: 20,
     background: "transparent",
     border: "none",
     cursor: "pointer",
-    fontSize: 18,
+    color: "var(--text)",
   },
 };
